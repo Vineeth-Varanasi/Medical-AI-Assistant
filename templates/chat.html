@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatGPT-like Interface</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h1>Medical AI Assistant</h1>
+    </header>
+    <div class="chat-display" id="chat-display">
+      <!-- Messages will be dynamically added here -->
+    </div>
+    <div class="chat-input">
+      <textarea id="user-input" rows="1" placeholder="Type your message..."></textarea>
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const sendBtn = document.getElementById("send-btn");
+    const userInput = document.getElementById("user-input");
+    const chatDisplay = document.getElementById("chat-display");
+
+    sendBtn.addEventListener("click", sendMessage);
+
+    function sendMessage() {
+      const userMessage = userInput.value.trim();
+      if (!userMessage) return;
+
+      // Display user message
+      appendMessage("user", userMessage);
+
+      // Clear input field
+      userInput.value = "";
+
+      // Fetch response from the backend
+      fetch("/get", {
+        method: "POST",
+        body: new URLSearchParams({ msg: userMessage }),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      })
+        .then((response) => response.text())
+        .then((botMessage) => {
+          appendMessage("bot", botMessage);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          appendMessage("bot", "Oops! Something went wrong. Please try again.");
+        });
+    }
+
+    function appendMessage(sender, message) {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("message", sender);
+      const messageContent = document.createElement("p");
+      messageContent.textContent = message;
+      messageDiv.appendChild(messageContent);
+      chatDisplay.appendChild(messageDiv);
+      chatDisplay.scrollTop = chatDisplay.scrollHeight; // Scroll to the bottom
+    }
+  </script>
+</body>
+</html>
