@@ -1,4 +1,4 @@
-# Medical-AI-Assistant
+# Healix
 ## Flask App with Environment Variables Integration
 
 This project is a Flask-based application that utilizes environment variables for secure API key management. It demonstrates the integration of Pinecone, Groq, and other AI components to handle question-answering tasks.
