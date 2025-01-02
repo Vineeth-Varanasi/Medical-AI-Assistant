@@ -1,67 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChatGPT-like Interface</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-  <div class="chat-container">
-    <header class="chat-header">
-      <h1>Medical AI Assistant</h1>
-    </header>
-    <div class="chat-display" id="chat-display">
-      <!-- Messages will be dynamically added here -->
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1>Medical AI Assistant</h1>
+            <div class="header-accent"></div>
+        </header>
+        
+        <div class="chat-display" id="chat-display">
+            <!-- Messages will be dynamically added here -->
+            <div class="welcome-message">
+                <p>Welcome! How can I assist you with your medical questions today?</p>
+            </div>
+        </div>
+
+        <div class="typing-indicator hidden" id="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="chat-input">
+            <textarea id="user-input" rows="1" placeholder="Type your message..." autofocus></textarea>
+            <button id="send-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
     </div>
-    <div class="chat-input">
-      <textarea id="user-input" rows="1" placeholder="Type your message..."></textarea>
-      <button id="send-btn">Send</button>
-    </div>
-  </div>
 
-  <script>
-    const sendBtn = document.getElementById("send-btn");
-    const userInput = document.getElementById("user-input");
-    const chatDisplay = document.getElementById("chat-display");
+    <script>
+        const sendBtn = document.getElementById("send-btn");
+        const userInput = document.getElementById("user-input");
+        const chatDisplay = document.getElementById("chat-display");
+        const typingIndicator = document.getElementById("typing-indicator");
 
-    sendBtn.addEventListener("click", sendMessage);
-
-    function sendMessage() {
-      const userMessage = userInput.value.trim();
-      if (!userMessage) return;
-
-      // Display user message
-      appendMessage("user", userMessage);
-
-      // Clear input field
-      userInput.value = "";
-
-      // Fetch response from the backend
-      fetch("/get", {
-        method: "POST",
-        body: new URLSearchParams({ msg: userMessage }),
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      })
-        .then((response) => response.text())
-        .then((botMessage) => {
-          appendMessage("bot", botMessage);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          appendMessage("bot", "Oops! Something went wrong. Please try again.");
+        sendBtn.addEventListener("click", sendMessage);
+        userInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
         });
-    }
 
-    function appendMessage(sender, message) {
-      const messageDiv = document.createElement("div");
-      messageDiv.classList.add("message", sender);
-      const messageContent = document.createElement("p");
-      messageContent.textContent = message;
-      messageDiv.appendChild(messageContent);
-      chatDisplay.appendChild(messageDiv);
-      chatDisplay.scrollTop = chatDisplay.scrollHeight; // Scroll to the bottom
-    }
-  </script>
+        function sendMessage() {
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
+
+            // Display user message
+            appendMessage("user", userMessage);
+
+            // Clear input field
+            userInput.value = "";
+
+            // Show typing indicator
+            typingIndicator.classList.remove("hidden");
+
+            // Fetch response from the backend
+            fetch("/get", {
+                method: "POST",
+                body: new URLSearchParams({ msg: userMessage }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            })
+            .then((response) => response.text())
+            .then((botMessage) => {
+                // Hide typing indicator
+                typingIndicator.classList.add("hidden");
+                appendMessage("bot", botMessage);
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                typingIndicator.classList.add("hidden");
+                appendMessage("bot", "Oops! Something went wrong. Please try again.");
+            });
+        }
+
+        function appendMessage(sender, message) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", sender);
+            const messageContent = document.createElement("p");
+            messageContent.textContent = message;
+            messageDiv.appendChild(messageContent);
+            chatDisplay.appendChild(messageDiv);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+
+        // Auto-resize textarea
+        userInput.addEventListener("input", function() {
+            this.style.height = "auto";
+            this.style.height = (this.scrollHeight) + "px";
+        });
+    </script>
 </body>
 </html>
