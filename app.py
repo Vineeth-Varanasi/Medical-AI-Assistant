@@ -8,14 +8,18 @@ from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 from src.prompt import *
 import os
+from dotenv import load_dotenv
 
 
 app = Flask(__name__)
 
 load_dotenv()
 
-os.environ["PINECONE_API_KEY"] = "pcsk_6zhZoB_BwKU1neaWwyaRa1NpamZBdKJ6hJ7phoQf2tLrDe2tkD1DNk5XaNhi1YGfH5ZHd2"
-os.environ["GROQ_API_KEY"] = "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"
+# os.environ["PINECONE_API_KEY"] = "pcsk_6zhZoB_BwKU1neaWwyaRa1NpamZBdKJ6hJ7phoQf2tLrDe2tkD1DNk5XaNhi1YGfH5ZHd2"
+# os.environ["GROQ_API_KEY"] = "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"
+
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 embeddings = download_hugging_face_embeddings()
 
